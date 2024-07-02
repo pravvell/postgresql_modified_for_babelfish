@@ -772,31 +772,12 @@ ParseFuncOrColumn(ParseState *pstate, List *funcname, List *fargs,
 		if (fn != NULL)
 			funcexpr->context = copyObject(fn->context);
 
-		/* Inline the function if possible */
-		if (inline_function_call_hook && sql_dialect == SQL_DIALECT_TSQL &&
-			strcasecmp(strVal(llast(funcname)), "foo") == 0)
+		/* Inline the function by applying algebraic rules if possible */
+		if (inline_function_call_hook && sql_dialect == SQL_DIALECT_TSQL)
 		{
-			// /* Forget it if it has any showstopper properties */
-			// if (fdresult != FUNCDETAIL_NORMAL ||
-			// 	funcexpr->funcretset ||
-			// 	funcexpr->funcresulttype == RECORDOID)
-			// {
-			// 	;
-			// }
-			// else
-			// {
-			// 	if (strcasecmp(strVal(llast(funcname)), "foo") == 0)			// tmp check for debugging
-			// 	{
-			// 		Assert(0);
-			// 		retval = (*inline_function_call_hook)(pstate, funcexpr);
-			// 	}
-
-			// 	inlined_function = (retval != NULL);
-			// }
 			retval = (*inline_function_call_hook)(pstate, funcexpr);
 			if (retval)
 				return (Node *) retval;
-
 		}
 
 		retval = (Node *) funcexpr;
