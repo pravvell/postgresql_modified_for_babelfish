@@ -771,9 +771,11 @@ ParseFuncOrColumn(ParseState *pstate, List *funcname, List *fargs,
 		
 		if (fn != NULL)
 			funcexpr->context = copyObject(fn->context);
-
+	
 		/* Inline the function by applying algebraic rules if possible */
-		if (inline_function_call_hook && sql_dialect == SQL_DIALECT_TSQL)
+		// Inline only tsql language and scalar return type UDFs.
+		// Todo: disable variadic function.
+		if (inline_function_call_hook && sql_dialect == SQL_DIALECT_TSQL && !funcexpr->funcretset)
 		{
 			retval = (*inline_function_call_hook)(pstate, funcexpr);
 			if (retval)
